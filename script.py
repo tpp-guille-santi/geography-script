@@ -33,7 +33,7 @@ def makeScript ():
         print(departamento)
         myList = diccionario.get(departamento, [])
         print(myList)
-        myList.append(municipio)
+        myList.append(municipio["municipio"])
         diccionario[departamento] = myList
         print(diccionario)
     f = open("argentina.json", "w")        
