@@ -36,14 +36,15 @@ def makeProvincesMunicipiosDict (provinceId):
     
 
 def makeDepartmentInfo(provinceId):
-    r =requests.get('https://apis.datos.gob.ar/georef/api/departamentos?provincia='+provinceId)
+    r =requests.get('https://apis.datos.gob.ar/georef/api/departamentos?max=5000&provincia='+provinceId)
     if r.status_code != 200:
         return []
     departmentDictionary = json.loads(r.text)
     print("Consigo municipios de la provincia")
     municipios = makeProvincesMunicipiosDict(provinceId)
     for department in departmentDictionary["departamentos"]:        
-        department["municipios"] =municipios[department["id"]]
+        department["municipios"] =municipios.get(department["id"], [])
+    #print(json.dumps(departmentDictionary))        
     return departmentDictionary["departamentos"]        
 
 
@@ -56,11 +57,10 @@ def makeProvinceInformation():
     for province in provinceDictionary["provincias"]:
         print(province["nombre"])
         province["departamentos"] = makeDepartmentInfo(province["id"])
-        f = open("argentina_2.json", "w")            
+        f = open("argentina.json", "w")            
         f.write(json.dumps(provinceDictionary))    
         f.close()    
     return
 
 makeProvinceInformation()
-#Entre Rios, Santa Cruz
-
+#makeDepartmentInfo("30")
