@@ -23,23 +23,44 @@ def getMunicipioInformation(provinceId):
     #print(municipiosDeProvincia)        
     return municipiosDeProvincia        
 
-
-
-def makeScript ():
-    municipios = getMunicipioInformation("54")
+def makeProvincesMunicipiosDict (provinceId):
+    municipios = getMunicipioInformation(provinceId)
     diccionario = {}
     for municipio in municipios:
         departamento = municipio["departamento"]["id"]
-        print(departamento)
         myList = diccionario.get(departamento, [])
-        print(myList)
         myList.append(municipio["municipio"])
         diccionario[departamento] = myList
-        print(diccionario)
-    f = open("argentina.json", "w")        
-    f.write(json.dumps(diccionario))
-    f.close()
+    #print(diccionario)
+    return diccionario
     
-makeScript()
+
+def makeDepartmentInfo(provinceId):
+    r =requests.get('https://apis.datos.gob.ar/georef/api/departamentos?provincia='+provinceId)
+    if r.status_code != 200:
+        return []
+    departmentDictionary = json.loads(r.text)
+    print("Consigo municipios de la provincia")
+    municipios = makeProvincesMunicipiosDict(provinceId)
+    for department in departmentDictionary["departamentos"]:        
+        department["municipios"] =municipios[department["id"]]
+    return departmentDictionary["departamentos"]        
+
+
+def makeProvinceInformation():
+    r =requests.get('https://apis.datos.gob.ar/georef/api/provincias')    
+    if r.status_code != 200:
+        return
+    print("Descargue las provincias")
+    provinceDictionary = json.loads(r.text)
+    for province in provinceDictionary["provincias"]:
+        print(province["nombre"])
+        province["departamentos"] = makeDepartmentInfo(province["id"])
+        f = open("argentina_2.json", "w")            
+        f.write(json.dumps(provinceDictionary))    
+        f.close()    
+    return
+
+makeProvinceInformation()
 #Entre Rios, Santa Cruz
 
